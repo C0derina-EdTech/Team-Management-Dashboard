@@ -1,5 +1,5 @@
 import { AppSidebar } from '@/components/app-sidebar';
-import { SidebarInset, SidebarProvider } from '@/components/sidebar';
+import { SidebarInset, SidebarProvider } from '@coderina-ams/ui/components/sidebar';
 import { SiteHeader } from '@/components/site-header';
 import { Providers } from '@/provider';
 import { useAuthenticate } from '@daveyplate/better-auth-ui';

@@ -1,0 +1,1 @@
+export { default } from "@coderina-ams/ui/postcss.config";

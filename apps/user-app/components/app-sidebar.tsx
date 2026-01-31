@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
 } from "@coderina-ams/ui/components/sidebar";
 import { Logo } from "@coderina-ams/ui/components/logo";
-import { Plug2, Sliders } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { UserButton } from "@daveyplate/better-auth-ui";
 
 const data = {
@@ -28,20 +28,15 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/app",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
-      title: "Integrations",
-      url: "/app/integration",
-      icon: Plug2,
-    },
-    {
-      title: "Preferences",
-      url: "/app/preferences",
-      icon: Sliders,
+      title: "Events",
+      url: "/events",
+      icon: Calendar,
     }
-  ]
+  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -64,7 +59,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-
         <UserButton
           size='default'
           // className="border-destructive w-64 bg-destructive/30"

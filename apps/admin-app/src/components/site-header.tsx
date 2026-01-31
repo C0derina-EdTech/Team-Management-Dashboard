@@ -1,5 +1,5 @@
 import { Separator } from "@coderina-ams/ui/components/separator";
-import { SidebarTrigger } from "@/components/sidebar";
+import { SidebarTrigger } from "@coderina-ams/ui/components/sidebar";
 
 export function SiteHeader({ name }: { name?: string }) {
   return (

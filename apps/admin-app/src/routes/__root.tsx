@@ -3,7 +3,6 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
-  createRootRouteWithContext,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
@@ -18,7 +17,8 @@ import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 import { Providers } from '@/provider'
-import { Toaster } from '@muse/ui/components/sonner'
+import { Toaster } from '@coderina-ams/ui/components/sonner'
+import { NotFound } from '@/components/not-found'
 
 
 interface MyRouterContext {
@@ -52,6 +52,7 @@ export const Route = createRootRoute({
   }),
   component: RootComponent,
   shellComponent: RootDocument,
+  notFoundComponent: () => <NotFound />,
 })
 
 function RootComponent() {
