@@ -1,3 +1,4 @@
+"use client"
 import {
     Card,
     CardContent,
@@ -11,6 +12,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@coderina-ams/ui/components/tabs"
+import { Camera } from "./scan"
 
 export function EventDetails() {
     return (
@@ -20,6 +22,7 @@ export function EventDetails() {
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 <TabsTrigger value="reports">Reports</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
+                <TabsTrigger value="check-in">Check In</TabsTrigger>
             </TabsList>
             <TabsContent value="overview">
                 <Card>
@@ -74,6 +77,20 @@ export function EventDetails() {
                     </CardHeader>
                     <CardContent className="text-muted-foreground text-sm">
                         Configure notifications, security, and themes.
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="check-in">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Check In</CardTitle>
+                        <CardDescription>
+                            Scan the QR code to check in to the event.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-muted-foreground text-sm">
+                        {/* <Scanner /> */}
+                        <Camera />
                     </CardContent>
                 </Card>
             </TabsContent>
