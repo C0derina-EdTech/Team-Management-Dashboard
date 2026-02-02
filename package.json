@@ -6,7 +6,10 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "infra:preview": "cd infra && pulumi preview",
+    "infra:up": "cd infra && pulumi up",
+    "infra:destroy": "cd infra && pulumi destroy"
   },
   "devDependencies": {
     "@coderina-ams/eslint-config": "workspace:*",

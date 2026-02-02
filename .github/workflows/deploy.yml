@@ -1,0 +1,30 @@
+name: Deploy Infrastructure
+on:
+  push:
+    branches: [main]
+    paths: ['infra/**']
+
+jobs: 
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: pulumi/actions@v5
+        with:
+          command: up
+          stack-name: coderina-ams-dev
+          work-dir: infra
+        env:
+          # PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          # ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          # ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          # ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          # ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          PULUMI_ACCESS_TOKEN: postgresql://root:root@localhost:5432/grads_apps
+          ARM_CLIENT_ID: ${{  github.run_id }}
+          ARM_CLIENT_SECRET: http://localhost:4000
+          ARM_TENANT_ID: ${{  github.run_id }}
+          ARM_SUBSCRIPTION_ID: ${{  github.run_id }}
