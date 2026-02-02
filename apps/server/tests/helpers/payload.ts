@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker"
-import { describe, it } from "bun:test"
 import * as pactum from "pactum"
 import { capturedToken } from "../../src/auth/auth.js"
 import { updateUserRole } from "../../src/db/index.js"
@@ -15,6 +14,14 @@ const organizationPayload = {
   slug: faker.lorem.slug(),
   userId: "$S{userId}",
 
+}
+
+const eventPayload = {
+  name: faker.lorem.words(2),
+  description: faker.lorem.sentence(),
+  startDate: faker.date.soon(),
+  endDate: faker.date.future(),
+  organizationId: "$S{orgId}",
 }
 
 const teamPayload = {
@@ -89,8 +96,11 @@ export async function createAdmin(email: string = "admin@test.com") {
   return res
 }
 
+export const numberRegex = /^\d+$/
+
 export {
   organizationPayload,
   teamPayload,
   userAuthPayload,
+  eventPayload
 }

@@ -4,9 +4,11 @@ import { drizzle } from "drizzle-orm/postgres-js"
 import { reset, seed } from "drizzle-seed"
 import { NotFoundError } from "elysia"
 import postgres from "postgres"
-import { config } from "../config.js"
-import { PAGE_SIZE } from "./constants.js"
-import * as schema from "./schema.js"
+import { config } from "../config.ts"
+import * as schema from "./schema.ts"
+
+export * from "./events/index.ts"
+export * from "./tickets/index.ts"
 
 type TableName = keyof typeof schema
 
@@ -33,7 +35,7 @@ export async function updateUserRole(userId: string, role: string = "admin") {
     .returning()
 }
 
-function getPaginatedMeta(page: number, pageSize: number, total: number) {
+export function getPaginatedMeta(page: number, pageSize: number, total: number) {
   return {
     page,
     total,
@@ -49,7 +51,6 @@ export async function insertOne<T extends TableName>(
   try {
     const tableRef = schema[table] as unknown as SQLWrapper
     const res = await db.insert(tableRef as any).values(body).returning()
-    // console.log({ body })
     return {
       message: `Successfully created a ${table}`,
       data: res[0],
@@ -135,54 +136,7 @@ export async function deleteOne<T extends TableName>(
     throw new Error(`Failed to delete ${table}`, { cause: error })
   }
 }
-export async function getPosts(userId: string, page = 1, pageSize = PAGE_SIZE) {
-  const data = await db.query.posts.findMany({
-    limit: pageSize,
-    offset: (page - 1) * pageSize,
-    with: {
-      // post_media: true,
-      // user: true,
-    },
-    orderBy: [desc(schema.posts.createdAt)],
-    where: and(eq(schema.posts.user_id, userId), eq(schema.posts.status, "published")),
-  })
-  const total = await db.$count(
-    schema.posts,
-    and(eq(schema.posts.user_id, userId), eq(schema.posts.status, "published")),
-  )
 
-  return {
-    message: `Successfully retrieved all posts`,
-    data,
-    meta: getPaginatedMeta(page, pageSize, total),
-  }
-}
-export async function getSinglePost(postId: string) {
-  const post = await db.query.posts.findFirst({
-    where: eq(schema.posts.id, postId),
-    with: {
-      // post_media: true,
-    },
-    orderBy: [desc(schema.posts.createdAt)],
-  })
-  return {
-    message: `Successfully retrieved a post`,
-    data: post,
-  }
-}
-export async function getUserPosts(userId: string) {
-  const posts = await db.query.posts.findMany({
-    where: eq(schema.posts.user_id, userId),
-    with: {
-      // post_media: true,
-    },
-    orderBy: [desc(schema.posts.createdAt)],
-  })
-  return {
-    message: `Successfully retrieved all users post`,
-    data: posts,
-  }
-}
 export async function getUserMedia(userId: string) {
   const data = await db.query.files.findMany({
     where: eq(schema.files.uploaded_by, userId),
@@ -193,23 +147,4 @@ export async function getUserMedia(userId: string) {
     data,
   }
 }
-export async function getCommunityPosts(communityId: string, page = 1, pageSize = PAGE_SIZE) {
-  const copilots = await db.query.posts.findMany({
-    limit: pageSize,
-    offset: (page - 1) * pageSize,
-    with: {
-      // post_media: true,
-    },
-    orderBy: [desc(schema.posts.createdAt)],
-  })
-  const total = await db.$count(
-    schema.posts,
-    eq(schema.posts.user_id, communityId),
-  )
 
-  return {
-    message: `Successfully retrieved all posts`,
-    data: copilots,
-    meta: getPaginatedMeta(page, pageSize, total),
-  }
-}

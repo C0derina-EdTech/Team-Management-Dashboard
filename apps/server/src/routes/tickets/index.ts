@@ -3,36 +3,36 @@ import Elysia, { t } from "elysia"
 import { authGuard } from "../../auth/auth.ts"
 import {
   deleteOne,
-  getSingleEvent,
-  getUserEvents,
+  getSingleTicket,
+  getUserTickets,
   insertOne,
   updateOne,
 } from "../../db/index.ts"
 import { models } from "../../db/model.ts"
 
-const { events: eventInsert } = models.insert
+const { tickets: ticketInsert } = models.insert
 
-export type NewEvent = typeof eventInsert
+export type NewTicket = typeof ticketInsert
 
 export default (events: ElysiaApp) => events.model({
-  Event: t.Object(eventInsert as any),
+  Ticket: t.Object(ticketInsert as any),
 })
   .guard({
-    tags: ["Events"],
+    tags: ["Tickets"],
     detail: {
       description: "Require user to be logged in",
     },
   })
   .use(authGuard)
   .get("", ({ query: { page, pageSize }, user: { id: userId } }: { query: { page?: number, pageSize?: number }, user: { id: string } }) =>
-    getUserEvents(userId, page, pageSize), {
+    getUserTickets(userId, page, pageSize), {
     auth: true,
     query: t.Object({
       page: t.Optional(t.Number()),
       pageSize: t.Optional(t.Number()),
     }),
   })
-  .get("/:id", ({ params: { id } }: { params: { id: string } }) => getSingleEvent(id), {
+  .get("/:id", ({ params: { id } }: { params: { id: string } }) => getSingleTicket(id), {
     params: t.Object({
       id: t.String(),
     }),
@@ -42,13 +42,13 @@ export default (events: ElysiaApp) => events.model({
     user: { id: user_id },
     body,
   }: {
-    body: NewEvent
+    body: NewTicket
     user: { id: string }
-  }) => insertOne("events", {
+  }) => insertOne("ticket", {
     ...body,
     user_id,
   }), {
-    body: t.Object(eventInsert as any),
+    body: t.Object(ticketInsert as any),
     auth: true,
   })
   .put("/:id", ({
@@ -56,16 +56,16 @@ export default (events: ElysiaApp) => events.model({
     body,
   }: {
     params: { id: string }
-    body: { body: NewEvent }
-  }) => updateOne("events", id, body), {
-    body: t.Partial(t.Object(eventInsert as any)),
+    body: { body: NewTicket }
+  }) => updateOne("ticket", id, body), {
+    body: t.Partial(t.Object(ticketInsert as any)),
     params: t.Object({
       id: t.String(),
     }),
     auth: true,
   })
   .delete("/:id", ({ params: { id } }: { params: { id: string } }) => {
-    deleteOne("events", id)
+    deleteOne("ticket", id)
   }, {
     auth: true,
   })

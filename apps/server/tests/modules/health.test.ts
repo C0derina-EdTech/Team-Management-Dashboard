@@ -14,6 +14,6 @@ describe("General Health Check", () => {
       .spec()
       .get("/openapi")
       .expectStatus(200)
-      .expectBodyContains("Engage Lagos API")
+      .expectBodyContains("Coderina Event Management API")
   })
 })
