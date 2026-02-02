@@ -1,5 +1,5 @@
 import type { ElysiaApp } from "../../server.ts"
-import Elysia, { t } from "elysia"
+import Elysia, { checksum, t } from "elysia"
 import { authGuard } from "../../auth/auth.ts"
 import {
   deleteOne,
@@ -9,6 +9,7 @@ import {
   updateOne,
 } from "../../db/index.ts"
 import { models } from "../../db/model.ts"
+import {  generateQRCode } from "../../services/utils.ts"
 
 const { tickets: ticketInsert } = models.insert
 
@@ -38,16 +39,27 @@ export default (events: ElysiaApp) => events.model({
     }),
     auth: true,
   })
-  .post("/new", ({
+  .post("/new", async ({
     user: { id: user_id },
     body,
   }: {
     body: NewTicket
     user: { id: string }
-  }) => insertOne("ticket", {
-    ...body,
-    user_id,
-  }), {
+  }) => {
+
+    // TODO: send email to user
+    // Email will contain a PDF containing QR code containing ticket id, event id
+    const { data: ticket, message } = await insertOne("ticket", {
+      ...body,
+      user_id,
+    })
+    // const qr_payload = await encryptPayload(ticket.id + "_" + body.event_id)
+    // const qr = await generateQRCode(qr_payload)
+    return {
+      data: ticket,
+      message,
+    }
+  }, {
     body: t.Object(ticketInsert as any),
     auth: true,
   })

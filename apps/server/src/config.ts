@@ -26,4 +26,5 @@ export const config = {
     .asString()
     .split(","),
   RESEND_API_KEY: env.get("RESEND_API_KEY").required().asString(),
+  GOTENBERG_ENDPOINT: env.get("GOTENBERG_ENDPOINT").default("http://localhost:3100").asString(),
 }

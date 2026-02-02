@@ -262,9 +262,10 @@ export const ticket = pgTable("ticket", {
     .$defaultFn(() => createId()),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  status: text("status").default("valid").notNull(),
+  status: text("status").default("ISSUED").notNull(), // [ISSUED, CHECKED_IN, CANCELLED]
   priority: text("priority").default("medium").notNull(),
   checked_in: boolean("checked_in").default(false).notNull(),
+  ticket_code: text("ticket_code").notNull(),
   user_id: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),

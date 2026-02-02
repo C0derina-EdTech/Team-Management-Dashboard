@@ -3,16 +3,21 @@ import Elysia, { t } from "elysia"
 import { authGuard } from "../../auth/auth.ts"
 import {
   deleteOne,
+  getOneByID,
   getSingleEvent,
   getUserEvents,
   insertOne,
+  issueTicketArtifacts,
   updateOne,
 } from "../../db/index.ts"
 import { models } from "../../db/model.ts"
+import { sendEmail } from "../../services/resend.ts"
+import { generatePdf } from "../../services/pdf-gen.ts"
 
-const { events: eventInsert } = models.insert
+const { events: eventInsert, tickets: ticketInsert } = models.insert
 
 export type NewEvent = typeof eventInsert
+export type NewTicket = typeof ticketInsert
 
 export default (events: ElysiaApp) => events.model({
   Event: t.Object(eventInsert as any),
@@ -64,6 +69,101 @@ export default (events: ElysiaApp) => events.model({
     }),
     auth: true,
   })
+  // .post("/:id/register", async ({
+  //   params: { id },
+  //   body,
+  //   user: { id: user_id },
+  // }: {
+  //   params: { id: string }
+  //   body: NewTicket,
+  //   user: { id: string, name: string }
+  // }) => {
+
+  //   // ├─ Create Ticket (DB)
+  //   // ├─ Generate QR code (image or SVG)
+  //   // ├─ Generate Ticket HTML
+  //   // ├─ Send HTML → Gotenberg → PDF
+  //   // ├─ Store PDF (optional)
+  //   // └─ Email PDF via Resend 
+  //   const { data: ticket } = await insertOne("ticket", {
+  //     ...body,
+  //     event_id: id,
+  //     user_id,
+
+  //   })
+  //   const event = await getSingleEvent(id)
+  //   const user = await getOneByID("user", user_id)
+  //   const pdfBuffer = await generatePdf(event.data?.name!)
+  //   await sendEmail({
+  //     to: user.data?.email,
+  //     subject: `Your Ticket for ${event.data?.name}`,
+  //     html: `<p>Your ticket is attached.</p>`,
+  //     attachments: [
+  //       {
+  //         filename: `${event.data?.name}-ticket.pdf`,
+  //         content: Buffer.from(pdfBuffer).toString("base64"),
+  //         // content: pdfBuffer,
+  //         type: "application/pdf",
+  //       }
+  //     ]
+  //   })
+
+  //   return {
+  //     message: "You have successfuly registered for the event",
+  //     data: ticket,
+  //   }
+
+  // }, {
+  //   body: t.Object(ticketInsert as any),
+  //   params: t.Object({
+  //     id: t.String(),
+  //   }),
+  //   auth: true,
+  // })
+  .post(
+  "/:id/register",
+  async ({ params: { id: eventId }, body, user }) => {
+    const userId = user.id;
+
+    // 1️⃣ Fetch dependencies in parallel
+    const [eventRes, userRes] = await Promise.all([
+      getSingleEvent(eventId),
+      getOneByID("user", userId),
+    ]);
+
+    if (!eventRes?.data) throw new Error("Event not found");
+    if (!userRes?.data) throw new Error("User not found");
+
+    // 2️⃣ Create ticket (critical path)
+    const ticketCode = crypto.randomUUID();
+
+    const { data: ticket } = await insertOne("ticket", {
+      ...body,
+      event_id: eventId,
+      user_id: userId,
+      ticket_code: ticketCode,
+      status: "ISSUED",
+    });
+
+    // 3️⃣ Fire-and-forget side effects
+    void issueTicketArtifacts({
+      ticket,
+      ticketCode,
+      event: eventRes.data,
+      user: userRes.data,
+    });
+
+    return {
+      message: "You have successfully registered for the event",
+      data: ticket,
+    };
+  },
+  {
+    body: t.Object(ticketInsert as any),
+    params: t.Object({ id: t.String() }),
+    auth: true,
+  }
+)
   .delete("/:id", ({ params: { id } }: { params: { id: string } }) => {
     deleteOne("events", id)
   }, {
