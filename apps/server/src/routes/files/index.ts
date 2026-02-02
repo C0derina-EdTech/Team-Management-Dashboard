@@ -8,13 +8,15 @@ import { deleteFileFromS3, generateDownloadUrl, generatePresignedUrl } from "../
 
 const { files: mediaInsert } = models.insert
 
-const media: ElysiaApp = new Elysia({
-  tags: ["User Files/Credentials"],
+
+export default (media: ElysiaApp) => media.model({
+  Event: t.Object(mediaInsert as any),
 })
   .model({
     Post: t.Object(mediaInsert as any),
   })
   .guard({
+    tags: ["User Files/Credentials"],
     detail: {
       description: "Require user to be logged in",
     },
@@ -90,4 +92,3 @@ const media: ElysiaApp = new Elysia({
     auth: true,
   })
 
-export default media
