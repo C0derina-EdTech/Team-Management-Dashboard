@@ -11,8 +11,6 @@ import {
   updateOne,
 } from "../../db/index.ts"
 import { models } from "../../db/model.ts"
-import { sendEmail } from "../../services/resend.ts"
-import { generatePdf } from "../../services/pdf-gen.ts"
 
 const { events: eventInsert, tickets: ticketInsert } = models.insert
 
