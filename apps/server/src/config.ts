@@ -26,8 +26,4 @@ export const config = {
     .asString()
     .split(","),
   RESEND_API_KEY: env.get("RESEND_API_KEY").required().asString(),
-  // RESTATE_PORT: env.get("RESTATE_PORT").default(9080).asPortNumber(),
-  // CLOUDINARY_CLOUD_NAME: env.get("CLOUDINARY_CLOUD_NAME").required().asString(),
-  // CLOUDINARY_API_KEY: env.get("CLOUDINARY_API_KEY").required().asString(),
-  // CLOUDINARY_API_SECRET: env.get("CLOUDINARY_API_SECRET").required().asString(),
 }
