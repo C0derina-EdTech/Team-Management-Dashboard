@@ -17,6 +17,50 @@ export async function getSingleEvent(eventId: string) {
         data: post,
     }
 }
+export async function getSingleEventStats(eventId: string) {
+    const event = await db.query.events.findFirst({
+        where: eq(schema.events.id, eventId),
+        with: {
+            tickets: true,
+            // post_media: true,
+        },
+        orderBy: [desc(schema.events.startDate)],
+    })
+    // get issued tickets
+    // get checked-in tickets
+    // get total tickets
+
+    const issuedTickets = await db?.query?.events.findFirst({
+        where: eq(schema.events.id, eventId),
+        with: {
+            // post_media: true,
+            tickets: {
+                where: eq(schema.ticket.status, "ISSUED"),
+            }
+        },
+        orderBy: [desc(schema.ticket.createdAt)],
+    })
+    const checkedInTickets = await db?.query?.events.findFirst({
+        where: eq(schema.events.id, eventId),
+        with: {
+            // post_media: true,
+            tickets: {
+                where: eq(schema.ticket.status, "CHECKED_IN"),
+            }
+        },
+        orderBy: [desc(schema.ticket.createdAt)],
+    })
+
+
+    return {
+        message: `Successfully retrieved event stats`,
+        data: {
+            event,
+            issuedTickets,
+            checkedInTickets,
+        },
+    }
+}
 export async function getUserEvents(userId: string, page = 1, pageSize = PAGE_SIZE) {
     const data = await db.query.events.findMany({
         limit: pageSize,

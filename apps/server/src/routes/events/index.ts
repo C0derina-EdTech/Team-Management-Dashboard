@@ -5,6 +5,7 @@ import {
   deleteOne,
   getOneByID,
   getSingleEvent,
+  getSingleEventStats,
   getUserEvents,
   insertOne,
   issueTicketArtifacts,
@@ -36,6 +37,12 @@ export default (events: ElysiaApp) => events.model({
     }),
   })
   .get("/:id", ({ params: { id } }: { params: { id: string } }) => getSingleEvent(id), {
+    params: t.Object({
+      id: t.String(),
+    }),
+    auth: true,
+  })
+  .get("/:id/stats", ({ params: { id } }: { params: { id: string } }) => getSingleEventStats(id), {
     params: t.Object({
       id: t.String(),
     }),
@@ -119,49 +126,49 @@ export default (events: ElysiaApp) => events.model({
   //   auth: true,
   // })
   .post(
-  "/:id/register",
-  async ({ params: { id: eventId }, body, user }) => {
-    const userId = user.id;
+    "/:id/register",
+    async ({ params: { id: eventId }, body, user }) => {
+      const userId = user.id;
 
-    // 1️⃣ Fetch dependencies in parallel
-    const [eventRes, userRes] = await Promise.all([
-      getSingleEvent(eventId),
-      getOneByID("user", userId),
-    ]);
+      // 1️⃣ Fetch dependencies in parallel
+      const [eventRes, userRes] = await Promise.all([
+        getSingleEvent(eventId),
+        getOneByID("user", userId),
+      ]);
 
-    if (!eventRes?.data) throw new Error("Event not found");
-    if (!userRes?.data) throw new Error("User not found");
+      if (!eventRes?.data) throw new Error("Event not found");
+      if (!userRes?.data) throw new Error("User not found");
 
-    // 2️⃣ Create ticket (critical path)
-    const ticketCode = crypto.randomUUID();
+      // 2️⃣ Create ticket (critical path)
+      const ticketCode = crypto.randomUUID();
 
-    const { data: ticket } = await insertOne("ticket", {
-      ...body,
-      event_id: eventId,
-      user_id: userId,
-      ticket_code: ticketCode,
-      status: "ISSUED",
-    });
+      const { data: ticket } = await insertOne("ticket", {
+        ...body,
+        event_id: eventId,
+        user_id: userId,
+        ticket_code: ticketCode,
+        status: "ISSUED",
+      });
 
-    // 3️⃣ Fire-and-forget side effects
-    void issueTicketArtifacts({
-      ticket,
-      ticketCode,
-      event: eventRes.data,
-      user: userRes.data,
-    });
+      // 3️⃣ Fire-and-forget side effects
+      void issueTicketArtifacts({
+        ticket,
+        ticketCode,
+        event: eventRes.data,
+        user: userRes.data,
+      });
 
-    return {
-      message: "You have successfully registered for the event",
-      data: ticket,
-    };
-  },
-  {
-    body: t.Object(ticketInsert as any),
-    params: t.Object({ id: t.String() }),
-    auth: true,
-  }
-)
+      return {
+        message: "You have successfully registered for the event",
+        data: ticket,
+      };
+    },
+    {
+      body: t.Object(ticketInsert as any),
+      params: t.Object({ id: t.String() }),
+      auth: true,
+    }
+  )
   .delete("/:id", ({ params: { id } }: { params: { id: string } }) => {
     deleteOne("events", id)
   }, {
