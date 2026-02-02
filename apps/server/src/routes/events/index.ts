@@ -3,6 +3,7 @@ import Elysia, { t } from "elysia"
 import { authGuard } from "../../auth/auth.ts"
 import {
   deleteOne,
+  EventCheckin,
   getOneByID,
   getSingleEvent,
   getSingleEventStats,
@@ -74,57 +75,19 @@ export default (events: ElysiaApp) => events.model({
     }),
     auth: true,
   })
-  // .post("/:id/register", async ({
-  //   params: { id },
-  //   body,
-  //   user: { id: user_id },
-  // }: {
-  //   params: { id: string }
-  //   body: NewTicket,
-  //   user: { id: string, name: string }
-  // }) => {
-
-  //   // ├─ Create Ticket (DB)
-  //   // ├─ Generate QR code (image or SVG)
-  //   // ├─ Generate Ticket HTML
-  //   // ├─ Send HTML → Gotenberg → PDF
-  //   // ├─ Store PDF (optional)
-  //   // └─ Email PDF via Resend 
-  //   const { data: ticket } = await insertOne("ticket", {
-  //     ...body,
-  //     event_id: id,
-  //     user_id,
-
-  //   })
-  //   const event = await getSingleEvent(id)
-  //   const user = await getOneByID("user", user_id)
-  //   const pdfBuffer = await generatePdf(event.data?.name!)
-  //   await sendEmail({
-  //     to: user.data?.email,
-  //     subject: `Your Ticket for ${event.data?.name}`,
-  //     html: `<p>Your ticket is attached.</p>`,
-  //     attachments: [
-  //       {
-  //         filename: `${event.data?.name}-ticket.pdf`,
-  //         content: Buffer.from(pdfBuffer).toString("base64"),
-  //         // content: pdfBuffer,
-  //         type: "application/pdf",
-  //       }
-  //     ]
-  //   })
-
-  //   return {
-  //     message: "You have successfuly registered for the event",
-  //     data: ticket,
-  //   }
-
-  // }, {
-  //   body: t.Object(ticketInsert as any),
-  //   params: t.Object({
-  //     id: t.String(),
-  //   }),
-  //   auth: true,
-  // })
+  .put("/:id/check-in", async ({
+    params: { id },
+    body,
+  }: {
+    params: { id: string }
+    body: { body: NewTicket }
+  }) => EventCheckin(body.body?.ticket_code, id), {
+    body: t.Partial(t.Object(ticketInsert as any)),
+    params: t.Object({
+      id: t.String(),
+    }),
+    auth: true,
+  })
   .post(
     "/:id/register",
     async ({ params: { id: eventId }, body, user }) => {
