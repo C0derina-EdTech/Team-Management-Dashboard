@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@coderina-ams/ui"],
+  output: "standalone",
   images: {
     remotePatterns: [
       {

@@ -5,12 +5,14 @@ on:
     branches: [main, develop]
     paths:
       - 'apps/check-in/**'
+      - 'packages/**'
       - ".github/workflows/check-in-app_build_test.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches: [develop, main]
     paths:
       - 'apps/check-in/**'
+      - 'packages/**'
       - ".github/workflows/check-in-app_build_test.yml"
 
 jobs:
@@ -37,12 +39,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-        working-directory: .
 
       - name: Build project
         run: pnpm build
         working-directory: apps/check-in
 
+      - name: Prepare standalone build
+        run: |
+          cp -r apps/check-in/.next/static apps/check-in/.next/standalone/apps/check-in/.next/static
+          cp -r apps/check-in/public apps/check-in/.next/standalone/apps/check-in/public || true
+        
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -61,9 +67,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ steps.get-token.outputs.swa_token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "apps/check-in"
+          app_location: "apps/check-in/.next/standalone/apps/check-in"
           output_location: ".next"
           skip_app_build: true
           skip_api_build: true
-        env:
-          SKIP_DEPLOY_ON_MISSING_SECRETS: false

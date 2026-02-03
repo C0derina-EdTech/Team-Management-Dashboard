@@ -7,8 +7,8 @@ export function createStaticWebApp(name: string) {
         resourceGroupName: resourceGroup.name,
         location,
         sku: {
-            name: "Free",
-            tier: "Free",
+            name: "Standard",
+            tier: "Standard",
         },
         repositoryUrl: "https://github.com/C0derina-EdTech/Team-Management-Dashboard",
         branch: "main",

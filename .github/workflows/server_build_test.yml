@@ -5,10 +5,12 @@ on:
     branches: [develop]
     paths:
       - 'apps/server/**'
+      - ".github/workflows/server_build_test.yml"
   pull_request:
     branches: [develop, main]
     paths:
       - 'apps/server/**'
+      - ".github/workflows/server_build_test.yml"
 
 
 defaults:
