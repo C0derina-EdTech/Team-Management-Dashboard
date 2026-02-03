@@ -1,5 +1,6 @@
 import * as app from "@pulumi/azure-native/app";
 import * as pulumi from "@pulumi/pulumi";
+import * as appTypes from "@pulumi/azure-native/types/input";
 import * as authorization from "@pulumi/azure-native/authorization";
 import { containerAppEnv } from "./environment";
 import { registry } from "../core/acr";
@@ -11,7 +12,7 @@ export interface ContainerAppConfig {
     name: string;
     targetPort: number;
     image?: string;
-    env?: app.Type.input.app.EnvironmentVarArgs[];
+    env?: appTypes.app.EnvironmentVarArgs[];
     secrets?: {
         name: string;
         keyVaultSecretName: string;
