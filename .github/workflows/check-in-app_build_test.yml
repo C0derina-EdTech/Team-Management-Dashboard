@@ -74,6 +74,6 @@ jobs:
           skip_api_build: true
           app_location: "apps/check-in" # App source code path
           api_location: "" # Api source code path - optional
-          output_location: "apps/check-in/.next" # Built app content directory - optional
+          output_location: ".next" # Built app content directory - optional
         # env: # Add environment variables here
         #   IS_STATIC_EXPORT: true
