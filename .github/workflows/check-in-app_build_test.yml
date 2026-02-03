@@ -69,4 +69,5 @@ jobs:
           action: "upload"
           app_location: "apps/check-in"
           output_location: ".next"
+          # output_location: "apps/check-in/.next"
           skip_app_build: true
