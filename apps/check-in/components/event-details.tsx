@@ -89,8 +89,8 @@ export function EventDetails() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="text-muted-foreground text-sm">
-                        {/* <Scanner /> */}
-                        <Camera />
+                        {/* <Camera /> */}
+                        QR scanning
                     </CardContent>
                 </Card>
             </TabsContent>
