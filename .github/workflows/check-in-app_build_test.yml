@@ -44,10 +44,10 @@ jobs:
         run: pnpm build
         working-directory: apps/check-in
 
-      - name: Prepare standalone build
-        run: |
-          cp -r apps/check-in/.next/static apps/check-in/.next/standalone/apps/check-in/.next/static
-          cp -r apps/check-in/public apps/check-in/.next/standalone/apps/check-in/public || true
+      # - name: Prepare standalone build
+      #   run: |
+      #     cp -r apps/check-in/.next/static apps/check-in/.next/standalone/apps/check-in/.next/static
+      #     cp -r apps/check-in/public apps/check-in/.next/standalone/apps/check-in/public || true
         
       - name: Azure Login
         uses: azure/login@v2
