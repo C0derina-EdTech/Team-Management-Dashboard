@@ -13,11 +13,6 @@ on:
       - 'apps/check-in/**'
       - ".github/workflows/check-in-app_build_test.yml"
 
-
-defaults:
-  run:
-    working-directory: apps/check-in
-
 jobs:
   build_and_deploy:
     runs-on: ubuntu-22.04
@@ -42,9 +37,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+        working-directory: .
 
       - name: Build project
         run: pnpm build
+        working-directory: apps/check-in
 
       - name: Azure Login
         uses: azure/login@v2
@@ -54,10 +51,9 @@ jobs:
       - name: Get Static Web App deployment token
         id: get-token
         run: |
-          TOKEN=$(az staticwebapp secrets list --name check-inb5a88180 --resource-group rg8f64d8a1  --query "properties.apiKey" -o tsv)
+          TOKEN=$(az staticwebapp secrets list --name check-inb5a88180 --resource-group rg8f64d8a1 --query "properties.apiKey" -o tsv)
           echo "::add-mask::$TOKEN"
           echo "swa_token=$TOKEN" >> $GITHUB_OUTPUT
-        working-directory: .
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
@@ -65,7 +61,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ steps.get-token.outputs.swa_token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          package_manager: "pnpm"
           app_location: "apps/check-in"
           output_location: ".next"
           skip_app_build: true
+          skip_api_build: true
+        env:
+          SKIP_DEPLOY_ON_MISSING_SECRETS: false
