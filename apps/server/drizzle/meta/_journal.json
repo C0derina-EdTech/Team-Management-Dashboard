@@ -8,6 +8,27 @@
       "when": 1769766614940,
       "tag": "0000_secret_vampiro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770033120980,
+      "tag": "0001_futuristic_zombie",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770061700692,
+      "tag": "0002_breezy_corsair",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770068040962,
+      "tag": "0003_parallel_anthem",
+      "breakpoints": true
     }
   ]
 }

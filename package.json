@@ -6,14 +6,19 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "build:check-in": "nx build:check-in",
+    "infra:preview": "cd infra && pulumi preview",
+    "infra:up": "cd infra && pulumi up",
+    "infra:destroy": "cd infra && pulumi destroy"
   },
   "devDependencies": {
     "@coderina-ams/eslint-config": "workspace:*",
     "@coderina-ams/typescript-config": "workspace:*",
     "prettier": "^3.7.4",
     "turbo": "^2.6.3",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "nx": "22.4.4"
   },
   "packageManager": "pnpm@10.4.1",
   "pnpm": {

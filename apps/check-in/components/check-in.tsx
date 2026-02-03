@@ -12,7 +12,7 @@ import {
     AlertDialogTrigger,
 } from "@coderina-ams/ui/components/alert-dialog"
 import { Button } from "@coderina-ams/ui/components/button"
-import Scanner from "./scan"
+import { Camera } from "./scan"
 
 export function CheckIn() {
     return (
@@ -27,7 +27,9 @@ export function CheckIn() {
                         Scan the QR code to check in to the event.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <Scanner />
+                {/* <Scanner /> */}
+                <Camera />
+
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={() => console.log("Scan QR Code")}>Scan QR Code</AlertDialogAction>

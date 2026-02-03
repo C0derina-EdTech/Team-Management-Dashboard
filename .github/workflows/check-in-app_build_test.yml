@@ -1,0 +1,79 @@
+name: Check-In App
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/check-in/**'
+      - 'packages/**'
+      - ".github/workflows/check-in-app_build_test.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [develop, main]
+    paths:
+      - 'apps/check-in/**'
+      - 'packages/**'
+      - ".github/workflows/check-in-app_build_test.yml"
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        node-version: [20]
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm build
+        working-directory: apps/check-in
+
+      # - name: Prepare standalone build
+      #   run: |
+      #     cp -r apps/check-in/.next/static apps/check-in/.next/standalone/apps/check-in/.next/static
+      #     cp -r apps/check-in/public apps/check-in/.next/standalone/apps/check-in/public || true
+        
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get Static Web App deployment token
+        id: get-token
+        run: |
+          TOKEN=$(az staticwebapp secrets list --name check-inb5a88180 --resource-group rg8f64d8a1 --query "properties.apiKey" -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "swa_token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.get-token.outputs.swa_token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          # app_location: "apps/check-in"
+          # output_location: ".next"
+          # output_location: "apps/check-in/.next"
+          skip_app_build: true
+          skip_api_build: true
+          app_location: "apps/check-in" # App source code path
+          api_location: "" # Api source code path - optional
+          output_location: ".next" # Built app content directory - optional
+        # env: # Add environment variables here
+        #   IS_STATIC_EXPORT: true

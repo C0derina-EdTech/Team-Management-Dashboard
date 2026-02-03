@@ -7,16 +7,28 @@ export async function sendEmail({
   to,
   subject,
   html,
+  attachments,
+  // template,
 }: {
   to: string[]
   subject: string
   html: string
+  template?: string
+  attachments?: {
+    filename: string
+    content: string
+    type?: string
+  }[]
 }) {
   const { data, error } = await resend.emails.send({
     from: "hello@nemma.space",
     to,
     subject,
     html,
+    attachments,
+    // template: {
+    //   id: template,
+    // },
   })
 
   if (error) {
