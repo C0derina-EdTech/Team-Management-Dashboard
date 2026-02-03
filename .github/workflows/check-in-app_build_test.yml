@@ -1,30 +1,22 @@
-name: Web Build and Test
+name: Check-In App 
 
 on:
   push:
     branches: [main, develop]
     paths:
-      - 'apps/web/**'
+      - 'apps/check-in/**'
   pull_request:
     branches: [develop, main]
     paths:
-      - 'apps/web/**'
+      - 'apps/check-in/**'
 
 
 defaults:
   run:
-    working-directory: apps/web
+    working-directory: apps/check-in
     
 jobs:
-  # security:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v5
-  #     - uses: actions/setup-node@v5
-  #       with:
-  #         node-version: lts/*
-  #     - run: npm install -g secure-npm
-  #     - run: secure-npm scan --ai --report --output json
+
   build:
     runs-on: ubuntu-22.04
     strategy:
@@ -48,6 +40,17 @@ jobs:
         run: pnpm install
       - name: Build project
         run: pnpm build
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.CHECK_IN_APP_TOKEN }}
+          app_location: "apps/check-in"
+          output_location: ".next"
 
   # test:
   #   timeout-minutes: 60

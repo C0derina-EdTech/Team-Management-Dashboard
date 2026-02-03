@@ -1,0 +1,14 @@
+import * as web from "@pulumi/azure-native/web";
+import { resourceGroup } from "../core/resourceGroup";
+import { location } from "../config";
+
+export function createStaticWebApp(name: string) {
+    return new web.StaticSite(name, {
+        resourceGroupName: resourceGroup.name,
+        location,
+        sku: {
+            name: "Free",
+            tier: "Free",
+        },
+    });
+}
