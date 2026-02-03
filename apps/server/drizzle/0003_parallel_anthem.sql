@@ -1,0 +1,1 @@
+ALTER TABLE "ticket" ADD COLUMN "ticket_code" text NOT NULL;

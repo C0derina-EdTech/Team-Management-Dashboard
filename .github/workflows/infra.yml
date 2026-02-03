@@ -1,0 +1,21 @@
+name: Infra
+
+on:
+  push:
+    paths:
+      - infra/**
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pulumi/actions@v5
+        with:
+          command: up
+          stack-name: litmus-zhang.org/infra/prod
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}

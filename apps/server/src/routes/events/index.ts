@@ -3,17 +3,21 @@ import Elysia, { t } from "elysia"
 import { authGuard } from "../../auth/auth.ts"
 import {
   deleteOne,
-  getPosts,
-  getSinglePost,
-  getUserPosts,
+  EventCheckin,
+  getOneByID,
+  getSingleEvent,
+  getSingleEventStats,
+  getUserEvents,
   insertOne,
+  issueTicketArtifacts,
   updateOne,
 } from "../../db/index.ts"
 import { models } from "../../db/model.ts"
 
-const { events: eventInsert } = models.insert
+const { events: eventInsert, tickets: ticketInsert } = models.insert
 
 export type NewEvent = typeof eventInsert
+export type NewTicket = typeof ticketInsert
 
 export default (events: ElysiaApp) => events.model({
   Event: t.Object(eventInsert as any),
@@ -26,20 +30,23 @@ export default (events: ElysiaApp) => events.model({
   })
   .use(authGuard)
   .get("", ({ query: { page, pageSize }, user: { id: userId } }: { query: { page?: number, pageSize?: number }, user: { id: string } }) =>
-    getPosts(userId, page, pageSize), {
+    getUserEvents(userId, page, pageSize), {
     auth: true,
     query: t.Object({
       page: t.Optional(t.Number()),
       pageSize: t.Optional(t.Number()),
     }),
   })
-  .get("/:id", ({ params: { id } }: { params: { id: string } }) => getSinglePost(id), {
+  .get("/:id", ({ params: { id } }: { params: { id: string } }) => getSingleEvent(id), {
     params: t.Object({
       id: t.String(),
     }),
     auth: true,
   })
-  .get("/user", ({ user: { id: userId } }: { user: { id: string } }) => getUserPosts(userId), {
+  .get("/:id/stats", ({ params: { id } }: { params: { id: string } }) => getSingleEventStats(id), {
+    params: t.Object({
+      id: t.String(),
+    }),
     auth: true,
   })
   .post("/new", ({
@@ -51,7 +58,6 @@ export default (events: ElysiaApp) => events.model({
   }) => insertOne("events", {
     ...body,
     user_id,
-    status: "published",
   }), {
     body: t.Object(eventInsert as any),
     auth: true,
@@ -69,6 +75,63 @@ export default (events: ElysiaApp) => events.model({
     }),
     auth: true,
   })
+  .put("/:id/check-in", async ({
+    params: { id },
+    body,
+  }: {
+    params: { id: string }
+    body: { body: NewTicket }
+  }) => EventCheckin(body.body?.ticket_code, id), {
+    body: t.Partial(t.Object(ticketInsert as any)),
+    params: t.Object({
+      id: t.String(),
+    }),
+    auth: true,
+  })
+  .post(
+    "/:id/register",
+    async ({ params: { id: eventId }, body, user }) => {
+      const userId = user.id;
+
+      // 1️⃣ Fetch dependencies in parallel
+      const [eventRes, userRes] = await Promise.all([
+        getSingleEvent(eventId),
+        getOneByID("user", userId),
+      ]);
+
+      if (!eventRes?.data) throw new Error("Event not found");
+      if (!userRes?.data) throw new Error("User not found");
+
+      // 2️⃣ Create ticket (critical path)
+      const ticketCode = crypto.randomUUID();
+
+      const { data: ticket } = await insertOne("ticket", {
+        ...body,
+        event_id: eventId,
+        user_id: userId,
+        ticket_code: ticketCode,
+        status: "ISSUED",
+      });
+
+      // 3️⃣ Fire-and-forget side effects
+      void issueTicketArtifacts({
+        ticket,
+        ticketCode,
+        event: eventRes.data,
+        user: userRes.data,
+      });
+
+      return {
+        message: "You have successfully registered for the event",
+        data: ticket,
+      };
+    },
+    {
+      body: t.Object(ticketInsert as any),
+      params: t.Object({ id: t.String() }),
+      auth: true,
+    }
+  )
   .delete("/:id", ({ params: { id } }: { params: { id: string } }) => {
     deleteOne("events", id)
   }, {

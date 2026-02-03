@@ -1,0 +1,5 @@
+config:
+  infra:location: westeurope
+  infra:postgresSku: Standard_D2s_v3
+  infra:containerCpu: 2
+  infra:containerMemory: 4Gi

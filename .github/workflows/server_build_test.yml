@@ -1,0 +1,146 @@
+name: API Build and Test
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'apps/server/**'
+      - ".github/workflows/server_build_test.yml"
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'apps/server/**'
+      - ".github/workflows/server_build_test.yml"
+
+
+defaults:
+  run:
+    working-directory: apps/server
+
+jobs:
+  # security:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/setup-node@v5
+  #       with:
+  #         node-version: "20"
+  #     - run: npm install -g secure-npm
+  #     - run: secure-npm scan --ai --report --output json
+
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        node-version: [20]
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: grads_apps
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      s3mock:
+        image: adobe/s3mock:latest
+        ports:
+          - 9090:9090
+        env:
+          initialBuckets: my-test-bucket
+        # options: >-
+        #   --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://root:root@localhost:5432/grads_apps
+      BETTER_AUTH_SECRET: ${{  github.run_id }}
+      BETTER_AUTH_URL: http://localhost:4000
+      GOOGLE_CLIENT_ID: ${{  github.run_id }}
+      GOOGLE_CLIENT_SECRET: ${{  github.run_id }}
+      RESEND_API_KEY: ${{  github.run_id }}
+      AWS_REGION: us-east-1
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_BUCKET_NAME: coderina-events-media
+      S3_ENDPOINT: http://localhost:9090
+      FRONTEND_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
+      - uses: oven-sh/setup-bun@v2
+      - name: Run migration
+        run: bun migrate
+      - name: test project
+        run: pnpm run test
+
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   container: ghcr.io/railwayapp/cli:latest
+  #   env:
+  #     SVC_ID: my-service-id
+  #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: railway up --service=${{ env.SVC_ID }}
+
+
+  # merge-to-main:
+  #   needs: build-and-test
+  #   runs-on: ubuntu-latest
+  #   env: 
+  #     GH_TOKEN: ${{ github.token }}
+
+  #   if: github.ref == 'refs/heads/develop'
+  #   permissions:
+  #     contents: write
+  #     pull-requests: write
+  #   steps:
+  #     - name: ⬇️ Checkout repo
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+
+  #     # - name: Install GitHub CLI
+  #     #   uses: sersoft-gmbh/setup-gh-cli-action@v2
+  #     #   with:
+  #     #     version: stable
+
+  #     # - name: Authenticate gh
+  #     #   env: 
+  #     #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #     #   run: gh auth login --with-token
+  
+
+  #     - name: Create or update PR from develop → main
+  #       # env: 
+  #       #   GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #       run: |
+  #         # Try to create the PR (if one doesn’t exist)
+  #         gh pr create \
+  #           --base main \
+  #           --head develop \
+  #           --title "Sync develop → main" \
+  #           --body "Automated PR to keep main in sync with develop." || echo "PR already exists"
+
+  #     - name: Auto-merge PR
+  #       run: |
+  #         # Get the PR number
+  #         PR_NUMBER=$(gh pr list --base main --head develop --json number --jq '.[0].number')
+  #         echo "Merging PR #$PR_NUMBER"
+          
+  #         # Enable auto-merge (squash or merge commit, up to you)
+  #         gh pr merge $PR_NUMBER --merge --auto

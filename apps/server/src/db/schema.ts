@@ -221,8 +221,9 @@ export const events = pgTable("events", {
     .primaryKey()
     .$defaultFn(() => createId()),
   name: text("name").notNull(),
-  description: text("description").notNull(),
+  description: text("description").notNull().$default(() => ""),
   status: text("status").default("upcoming").notNull(),
+  event_format: text("event_format").default("physical").notNull(),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   createdAt: timestamp("created_at")
@@ -255,6 +256,31 @@ export const files = pgTable("files", {
     .notNull(),
 })
 
+export const ticket = pgTable("ticket", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  status: text("status").default("ISSUED").notNull(), // [ISSUED, CHECKED_IN, CANCELLED]
+  priority: text("priority").default("medium").notNull(),
+  checked_in: boolean("checked_in").default(false).notNull(),
+  ticket_code: text("ticket_code").notNull(),
+  user_id: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  event_id: text("event_id")
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .$onUpdate(() => new Date())
+    .notNull(),
+})
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -263,6 +289,8 @@ export const userRelations = relations(user, ({ many }) => ({
   invitations: many(invitation),
   credentials: many(credentials),
   users_files: many(files),
+  tickets: many(ticket),
+  events: many(events),
 }))
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -337,6 +365,24 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
   }),
 }))
 
+export const ticketRelations = relations(ticket, ({ one }) => ({
+  user: one(user, {
+    fields: [ticket.user_id],
+    references: [user.id],
+  }),
+  event: one(events, {
+    fields: [ticket.event_id],
+    references: [events.id],
+  }),
+}))
+
+export const eventRelations = relations(events, ({ many }) => ({
+  tickets: many(ticket),
+}))
+
+
+
+
 // export const mediaFilesRelations = relations(post_media_files, ({ one }) => ({
 //   post: one(posts, {
 //     fields: [post_media_files.post_id],
@@ -355,6 +401,10 @@ export const table = {
   account,
   verification,
   session,
+  ticket,
+  ticketRelations,
+  events,
+  eventRelations,
   organization,
   organizationRelations,
   organizationRole,
@@ -371,10 +421,7 @@ export const table = {
   teamMemberRelations,
   teamRelations,
   credentials,
-  events,
-  // post_media_files,
   files,
-  // mediaFilesRelations,
 } as const
 
 export type Table = typeof table
