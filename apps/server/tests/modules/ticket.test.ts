@@ -21,7 +21,7 @@ createCrudTestSuite({
         description: faker.lorem.sentence(),
         event_id: "$S{eventId}",
         user_id: "$S{userId}",
-        ticket_code: faker.internet.ip
+        ticket_code: faker.internet.ip(),
     }),
     updatePayload: o => ({
         ...o,

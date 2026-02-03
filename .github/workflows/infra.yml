@@ -15,7 +15,7 @@ jobs:
       - uses: pulumi/actions@v5
         with:
           command: up
-          stack-name: org/infra/prod
+          stack-name: litmus-zhang.org/infra/prod
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}

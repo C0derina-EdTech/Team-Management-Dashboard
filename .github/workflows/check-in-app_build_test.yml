@@ -1,4 +1,4 @@
-name: Check-In App 
+name: Check-In App
 
 on:
   push:
@@ -10,14 +10,12 @@ on:
     paths:
       - 'apps/check-in/**'
 
-
 defaults:
   run:
     working-directory: apps/check-in
-    
-jobs:
 
-  build:
+jobs:
+  build_and_deploy:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -25,11 +23,13 @@ jobs:
     env:
       NEXT_PUBLIC_API_URL: http://localhost:4000
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -38,52 +38,29 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
       - name: Build project
         run: pnpm build
 
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: Azure/static-web-apps-deploy@v1
+      - name: Azure Login
+        uses: azure/login@v2
         with:
-          # azure_static_web_apps_api_token: ${{ secrets.CHECK_IN_APP_TOKEN }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get Static Web App deployment token
+        id: get-token
+        run: |
+          TOKEN=$(az staticwebapp secrets list --name check-inb5a88180 --resource-group rg8f64d8a1  --query "properties.apiKey" -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "swa_token=$TOKEN" >> $GITHUB_OUTPUT
+        working-directory: .
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.get-token.outputs.swa_token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
           app_location: "apps/check-in"
           output_location: ".next"
-
-  # test:
-  #   timeout-minutes: 60
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v5
-
-  #   - name: Install pnpm
-  #     uses: pnpm/action-setup@v4
-  #   - name: Use Node.js ${{ matrix.node-version }}
-  #     uses: actions/setup-node@v4
-  #     with:
-  #       node-version: ${{ matrix.node-version }}
-  #       cache: "pnpm"
-  #   - name: Install dependencies
-  #     run: pnpm install
-  #   - name: Install Playwright Browsers
-  #     run: npx playwright install --with-deps
-  #   - name: Run Playwright tests
-  #     run: npx playwright test
-  #   - uses: actions/upload-artifact@v4
-  #     if: ${{ !cancelled() }}
-  #     with:
-  #       name: playwright-report
-  #       path: playwright-report/
-  #       retention-days: 30
-
-  # deploy:
-    # runs-on: ubuntu-latest
-    # container: ghcr.io/railwayapp/cli:latest
-    # env:
-    #   SVC_ID: my-service-id
-    #   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-    # steps:
-    #   - uses: actions/checkout@v3
-    #   - run: railway up --service=${{ env.SVC_ID }}
+          skip_app_build: true
