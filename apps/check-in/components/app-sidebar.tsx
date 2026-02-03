@@ -1,9 +1,6 @@
 "use client";
 
 import * as React from "react";
-import {
-  IconDashboard,
-} from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
 import {
@@ -16,7 +13,7 @@ import {
   SidebarMenuItem,
 } from "@coderina-ams/ui/components/sidebar";
 import { Logo } from "@coderina-ams/ui/components/logo";
-import { Calendar } from "lucide-react";
+import { Calendar, LayoutDashboard } from "lucide-react";
 import { UserButton } from "@daveyplate/better-auth-ui";
 
 const data = {
@@ -29,7 +26,7 @@ const data = {
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: IconDashboard,
+      icon: LayoutDashboard,
     },
     {
       title: "Events",

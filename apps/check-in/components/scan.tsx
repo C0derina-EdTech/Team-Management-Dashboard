@@ -79,18 +79,20 @@ export default function Scanner() {
 
 // import { useEffect, useRef, useState } from "react";
 
+
 export const Camera = () => {
-    const videoRef = useRef(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Ensure this runs only in the browser
+        // Run only in the browser
         if (typeof navigator !== "undefined" && navigator.mediaDevices) {
             navigator.mediaDevices
-                .getUserMedia({ video: true, audio: false })
+                .getUserMedia({ video: { facingMode: "environment" }, audio: false })
                 .then((stream) => {
                     if (videoRef.current) {
-                        videoRef.current.srcObject = stream;
+                        videoRef.current.srcObject = stream; // <-- attach stream correctly
+                        videoRef.current.play(); // optional, sometimes needed
                     }
                 })
                 .catch((err) => {
@@ -109,9 +111,9 @@ export const Camera = () => {
                 ref={videoRef}
                 autoPlay
                 playsInline
+                muted
                 style={{ width: "100%", maxWidth: "500px", border: "1px solid #ccc" }}
             />
         </div>
     );
-}
-2.
+};
