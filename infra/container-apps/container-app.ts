@@ -3,31 +3,43 @@ import * as pulumi from "@pulumi/pulumi";
 import * as authorization from "@pulumi/azure-native/authorization";
 import { containerAppEnv } from "./environment";
 import { registry } from "../core/acr";
-import { vault } from "../core/keyVault";
 import { containerResources } from "../config";
 import { resourceGroup } from "../core/resourceGroup";
-import { postgresServer } from "../data/postgres";
-import { EnvironmentVariableType } from "@pulumi/azure-native/types/enums/awsconnector";
+import { vault } from "../core/keyVault";
 
-interface ContainerAppArgs {
+export interface ContainerAppConfig {
     name: string;
-    image: pulumi.Input<string>;
-    // envVars?: ContainerAppArgs[];
-    envVars?: { name: string; value: pulumi.Input<string> | { secretRef: string } }[];
-    secrets?: { name: string; keyVaultUrl?: pulumi.Input<string>; value?: pulumi.Input<string> }[];
-    targetPort?: number;
+    targetPort: number;
+    image?: string;
+    env?: app.Type.input.app.EnvironmentVarArgs[];
+    secrets?: {
+        name: string;
+        keyVaultSecretName: string;
+    }[];
+    external?: boolean;
 }
 
-/**
- * Create a reusable Elysia API Container App
- */
-export function createContainerApp({
-    name,
-    image,
-    envVars = [],
-    secrets = [],
-    targetPort = 3000,
-}: ContainerAppArgs) {
+export interface ContainerAppResult {
+    app: app.ContainerApp;
+    url: pulumi.Output<string>;
+}
+
+export function createContainerApp(config: ContainerAppConfig): ContainerAppResult {
+    const {
+        name,
+        targetPort,
+        image,
+        env = [],
+        secrets = [],
+        external = true,
+    } = config;
+
+    const secretsConfig = secrets.map(s => ({
+        name: s.name,
+        keyVaultUrl: pulumi.interpolate`https://${vault.name}.vault.azure.net/secrets/${s.keyVaultSecretName}`,
+        identity: "system",
+    }));
+
     const containerApp = new app.ContainerApp(name, {
         resourceGroupName: resourceGroup.name,
         managedEnvironmentId: containerAppEnv.id,
@@ -36,57 +48,43 @@ export function createContainerApp({
         },
         configuration: {
             ingress: {
-                external: true,
+                external,
                 targetPort,
             },
-            registries: [
-                {
-                    server: registry.loginServer,
-                    identity: "system", // uses managed identity
-                },
-            ],
-            secrets: secrets.map(s => ({
-                ...s,
-                identity: "system", // Key Vault access via managed identity
-            })),
+            registries: [{
+                server: registry.loginServer,
+                identity: "system",
+            }],
+            secrets: secretsConfig.length > 0 ? secretsConfig : undefined,
         },
         template: {
-            containers: [
-                {
-                    name,
-                    image,
-                    resources: containerResources,
-                    env: envVars.map(v =>
-                        "secretRef" in v
-                            ? { name: v.name, secretRef: (v as any).secretRef }
-                            : { name: v.name, value: v.value }
-                    ),
-                },
-            ],
+            containers: [{
+                name,
+                image: image ?? pulumi.interpolate`${registry.loginServer}/${name}:latest`,
+                resources: containerResources,
+                env: env.length > 0 ? env : undefined,
+            }],
         },
     });
 
-    // Grant the Container App's system-assigned identity access to all Key Vault secrets
-    secrets.forEach(s => {
-        if (s.keyVaultUrl) {
-            new authorization.RoleAssignment(`${name}-kv-access-${s.name}`, {
-                principalId: containerApp.identity.apply(i => i!.principalId!),
-                roleDefinitionId:
-                    "/providers/Microsoft.Authorization/roleDefinitions/4633458b-17de-408a-b874-0445c86b69e6", // Key Vault Secrets User
-                scope: vault.id,
-                principalType: "ServicePrincipal",
-            });
-        }
-    });
+    if (secrets.length > 0) {
+        new authorization.RoleAssignment(`${name}-keyvault-secrets`, {
+            principalId: containerApp.identity.apply(i => i!.principalId!),
+            roleDefinitionId: "/providers/Microsoft.Authorization/roleDefinitions/4633458b-17de-408a-b874-0445c86b69e6",
+            scope: vault.id,
+            principalType: "ServicePrincipal",
+        });
+    }
 
-    // Grant pull access to ACR
     new authorization.RoleAssignment(`${name}-acr-pull`, {
         principalId: containerApp.identity.apply(i => i!.principalId!),
-        roleDefinitionId:
-            "/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d", // AcrPull
+        roleDefinitionId: "/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d",
         scope: registry.id,
         principalType: "ServicePrincipal",
     });
 
-    return containerApp;
+    // Build the URL from the FQDN
+    const url = pulumi.interpolate`https://${containerApp.configuration.apply(c => c?.ingress?.fqdn ?? "")}`;
+
+    return { app: containerApp, url };
 }

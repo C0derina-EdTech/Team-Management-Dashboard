@@ -5,10 +5,14 @@ on:
     branches: [main, develop]
     paths:
       - 'apps/check-in/**'
+      - ".github/workflows/check-in-app_build_test.yml"
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches: [develop, main]
     paths:
       - 'apps/check-in/**'
+      - ".github/workflows/check-in-app_build_test.yml"
+
 
 defaults:
   run:
@@ -61,6 +65,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ steps.get-token.outputs.swa_token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
+          package_manager: "pnpm"
           app_location: "apps/check-in"
           output_location: ".next"
           skip_app_build: true
