@@ -1,7 +1,7 @@
 import * as postgres from "@pulumi/azure-native/dbforpostgresql";
 import * as random from "@pulumi/random";
 import { resourceGroup } from "../core/resourceGroup";
-import { location } from "../config";
+import { postgresLocation } from "../config";
 
 export const dbPassword = new random.RandomPassword("pg-password", {
     length: 20,
@@ -10,7 +10,7 @@ export const dbPassword = new random.RandomPassword("pg-password", {
 
 export const postgresServer = new postgres.Server("postgres", {
     resourceGroupName: resourceGroup.name,
-    location,
+    location: postgresLocation,
     version: "16",
     administratorLogin: "adminuser",
     administratorLoginPassword: dbPassword.result,

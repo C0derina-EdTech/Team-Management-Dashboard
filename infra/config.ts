@@ -19,3 +19,6 @@ export const containerResources = {
     cpu: cfg.requireNumber("containerCpu"),
     memory: cfg.require("containerMemory"),
 };
+
+export const postgresLocation =
+    cfg.get("postgresLocation") ?? location;

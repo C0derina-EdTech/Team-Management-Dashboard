@@ -1,5 +1,6 @@
 config:
   infra:location: westeurope
+  infra:postgresLocation: northeurope
   infra:postgresSku: Standard_B1ms
   infra:containerCpu: 0.5
   infra:containerMemory: 1Gi

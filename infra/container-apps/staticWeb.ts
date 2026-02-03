@@ -10,5 +10,11 @@ export function createStaticWebApp(name: string) {
             name: "Free",
             tier: "Free",
         },
+        repositoryUrl: "https://github.com/C0derina-EdTech/Team-Management-Dashboard",
+        branch: "main",
+        buildProperties: {
+            appLocation: "apps/" + name,
+            outputLocation: ".next",
+        },
     });
 }

@@ -17,3 +17,4 @@ export const vault = new keyvault.Vault("kv", {
         enableRbacAuthorization: true,
     },
 });
+

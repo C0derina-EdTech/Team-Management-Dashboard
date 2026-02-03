@@ -14,6 +14,6 @@ import "./container-apps/api";
 // createWebApp("client", "acr.azurecr.io/client:latest");
 import { createStaticWebApp } from "./container-apps/staticWeb";
 
-createStaticWebApp("check-in");
+export const checkInApp = createStaticWebApp("check-in");
 // createStaticWebApp("admin");
 // createStaticWebApp("client");
