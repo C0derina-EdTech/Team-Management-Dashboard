@@ -1,4 +1,4 @@
-import EventsList from "@/components/events-list"
+import EventsList from "@coderina-ams/ui/components/events-list"
 import { Metadata } from "next";
 
 

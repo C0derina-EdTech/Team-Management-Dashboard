@@ -1,7 +1,7 @@
 import { Header } from '@/components/header';
 import { Hero } from '@/components/hero';
-import { EventSection } from '@/components/event-section';
-import { mockEvents } from '@/lib/events';
+import { EventSection } from '@coderina-ams/ui/components/event-section';
+import { mockEvents } from '@coderina-ams/ui/lib/events';
 
 export default function Home() {
   const upcomingEvents = mockEvents.filter((e) => e.status === 'upcoming');

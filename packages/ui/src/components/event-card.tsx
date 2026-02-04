@@ -1,6 +1,6 @@
 'use client';
 
-import { Event } from '@/lib/events';
+import { Event } from '@coderina-ams/ui/lib/events';
 import { Button } from '@coderina-ams/ui/components/button';
 import Link from 'next/link';
 import { CalendarIcon, MapPinIcon, UsersIcon } from 'lucide-react';

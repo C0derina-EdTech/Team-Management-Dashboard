@@ -1,10 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Header } from '@/components/header';
 import { Button } from '@coderina-ams/ui/components/button';
 import { Card } from '@coderina-ams/ui/components/card';
-import { mockEvents } from '@/lib/events';
+import { mockEvents } from '@coderina-ams/ui/lib/events';
 import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Calendar, Users, TrendingUp, Award } from 'lucide-react';

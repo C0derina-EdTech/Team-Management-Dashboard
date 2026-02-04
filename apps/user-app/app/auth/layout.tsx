@@ -1,4 +1,5 @@
 import { Logo } from "@coderina-ams/ui/components/logo";
+import BackgroundBoxesDemo from "@coderina-ams/ui/components/ui/boxes";
 import Image from "next/image";
 
 export default function AuthLayoutPage({
@@ -16,14 +17,8 @@ export default function AuthLayoutPage({
           <div className="w-full max-w-xs">{children}</div>
         </div>
       </div>
-      <div className="bg-muted relative hidden lg:block">
-        {/* <TruchetKaleidoscopeShadersDemo /> */}
-        <Image
-          src="/images/auth-bg.png"
-          alt="Auth Background"
-          fill
-          className="object-cover"
-        />
+      <div className="bg-muted relative hidden lg:block overflow-hidden">
+        <BackgroundBoxesDemo />
       </div>
     </div>
   );

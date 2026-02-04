@@ -21,7 +21,9 @@
     "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../../packages/ui/src/lib/events.ts",
+    "../../packages/ui/src/components/event-card.tsx"
   ],
   "exclude": [
     "node_modules"

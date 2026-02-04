@@ -1,4 +1,4 @@
-import { mockEvents } from '@/lib/events';
+import { mockEvents } from '@coderina-ams/ui/lib/events';
 import { Header } from '@/components/header';
 import { Button } from '@coderina-ams/ui/components/button';
 import Link from 'next/link';

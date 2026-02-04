@@ -12,7 +12,7 @@ import {
     AlertDialogTrigger,
 } from "@coderina-ams/ui/components/alert-dialog"
 import { Button } from "@coderina-ams/ui/components/button"
-import { Camera } from "./scan.js"
+import { Camera } from "./scan"
 
 export function CheckIn() {
     return (
