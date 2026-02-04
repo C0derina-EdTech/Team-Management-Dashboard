@@ -1,6 +1,5 @@
 "use client"
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
-
 import { Badge } from "@coderina-ams/ui/components/badge";
 import {
   Card,
