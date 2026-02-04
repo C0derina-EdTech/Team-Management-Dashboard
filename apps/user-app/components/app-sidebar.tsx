@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
 } from "@coderina-ams/ui/components/sidebar";
 import { Logo } from "@coderina-ams/ui/components/logo";
-import { Calendar } from "lucide-react";
+import { Calendar, PlugIcon } from "lucide-react";
 import { UserButton } from "@daveyplate/better-auth-ui";
 
 const data = {
@@ -32,9 +32,9 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Events",
-      url: "/events",
-      icon: Calendar,
+      title: "Integrations",
+      url: "/integrations",
+      icon: PlugIcon,
     }
   ],
 };
@@ -49,7 +49,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5 flex items-center gap-2"
             >
-              <Logo href="/app" />
+              <Logo href="/dashboard" />
 
             </SidebarMenuButton>
           </SidebarMenuItem>

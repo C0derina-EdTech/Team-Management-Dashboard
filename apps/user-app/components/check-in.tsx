@@ -12,6 +12,8 @@ import {
 import { Button } from "@coderina-ams/ui/components/button"
 import Scanner from "./scan.js"
 
+// ursa335a2@26.awesomesaucemail.org
+
 export function CheckIn() {
     return (
         <AlertDialog>

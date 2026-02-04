@@ -14,7 +14,7 @@ import { authClient } from "@/lib/auth-client";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-      const { slug } = useParams<{ slug: string }>()
+  const { slug } = useParams<{ slug: string }>()
 
 
   return (
@@ -34,16 +34,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
           providers: ["google"],
 
         }}
-       
+
         account={{
           // basePath: "/dashboard",
           // fields: ["image", "name"]
         }}
-         organization={{
-                pathMode: "slug",
-                basePath: "/organization",
-                slug
-            }}
+        organization={{
+          basePath: "/organization",
+        }}
         twoFactor={["otp", "totp"]}
         Link={Link}
         // localizeErrors={false}

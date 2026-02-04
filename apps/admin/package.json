@@ -1,0 +1,41 @@
+{
+  "name": "admin",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@coderina-ams/ui": "workspace:*",
+    "@daveyplate/better-auth-ui": "^3.3.15",
+    "@tabler/icons-react": "^3.35.0",
+    "axios": "^1.13.4",
+    "better-auth": "^1.4.18",
+    "jsqr": "^1.4.0",
+    "lucide-react": "^0.475.0",
+    "next": "16.0.10",
+    "next-themes": "^0.4.6",
+    "posthog-js": "^1.336.4",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "sonner": "^2.0.7",
+    "swr": "^2.4.0",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@coderina-ams/eslint-config": "workspace:^",
+    "@coderina-ams/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/node": "^20.19.25",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3"
+  }
+}

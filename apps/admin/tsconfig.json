@@ -1,0 +1,30 @@
+{
+  "extends": "@coderina-ams/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@coderina-ams/ui/*": [
+        "../../packages/ui/src/*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "next.config.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../../packages/ui/src/components/data-table.tsx"
+, "../../packages/ui/src/hooks/use-pagination.ts"  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
