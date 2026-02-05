@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth"
+import { betterAuth } from "better-auth/minimal"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { admin, bearer, emailOTP, openAPI, organization } from "better-auth/plugins"
 import { Elysia } from "elysia"
@@ -7,7 +7,6 @@ import { db } from "../db/index.js"
 import * as schema from "../db/schema.js"
 import { sendEmail } from "../services/resend.js"
 import { replaceLocalhostUrl, ResendNotificationTemplatesSubject } from "../services/utils.js"
-import { ac } from "./permission.js"
 
 // eslint-disable-next-line import/no-mutable-exports
 let capturedToken = ""
@@ -17,20 +16,37 @@ export const auth = betterAuth({
     provider: "pg", // or "mysql", "sqlite"
     schema,
   }),
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // Cache duration in seconds
+    },
+  },
 
   // baseURL: "http://localhost:3000",
   basePath: "/auth",
-  trustedOrigins: config.AUTH_CORS,
+  trustedOrigins: [
+    ...config.AUTH_CORS,
+    "*.coderina.org",
+    "https://*.coderina.org",
+  ],
   emailVerification: {
     sendVerificationEmail: async ({ user, url, token }) => {
-      const modifiedUrl = replaceLocalhostUrl(url, config.FRONTEND_URL)
+      const modifiedUrl = replaceLocalhostUrl(url, user?.role === "admin" ? "admin" : "user")
       capturedToken = token
       console.log("Verification token:", token)
       // console.log({ modifiedUrl })
       return sendEmail({
         to: [user.email],
         subject: ResendNotificationTemplatesSubject.VERIFICATION,
-        html: `Click the link to verify your email: ${modifiedUrl}`,
+        template: {
+          id: "verify-email-1",
+          variables: {
+            verificationUrl: modifiedUrl,
+          },
+        },
+        // jsxTemplate: jsx(EmailVerificationTemplate, { verificationUrl: modifiedUrl }),
+        // html: `Click the link to verify your email: ${modifiedUrl}`,
       })
     },
     sendOnSignUp: true,
@@ -41,11 +57,18 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url, token }) => {
       // Send reset password email
       console.log({ user, token, url })
-      const modifiedUrl = replaceLocalhostUrl(url, config.FRONTEND_URL)
+      const modifiedUrl = replaceLocalhostUrl(url, user.role === "admin" ? "admin" : "user")
       await sendEmail({
         to: [user.email],
         subject: ResendNotificationTemplatesSubject.RESET_OTP,
-        html: `Click the link to reset your email: ${modifiedUrl}`,
+        template: {
+          id: "forgot-password",
+          variables: {
+            resetPasswordUrl: modifiedUrl,
+
+          },
+        },
+        // html: `Click the link to reset your email: ${modifiedUrl}`,
       })
     },
 
@@ -80,7 +103,15 @@ export const auth = betterAuth({
         await sendEmail({
           to: [email],
           subject: ResendNotificationTemplatesSubject.INVITATION,
-          html: `You have been invited to join ${organization.name} as ${role}. Click the link to accept the invitation: ${config.FRONTEND_URL}/auth/organization/invite-member?invitationId=${id}`,
+          template: {
+            id: "new-member-invitation",
+            variables: {
+              teamName: organization.name,
+              invitationLink: replaceLocalhostUrl(`${config.FRONTEND_URL}/auth/organization/invite-member?invitationId=${id}`, "user"),
+
+            },
+          },
+          // html: `You have been invited to join ${organization.name} as ${role}. Click the link to accept the invitation: ${replaceLocalhostUrl(`${config.FRONTEND_URL}/auth/organization/invite-member?invitationId=${id}`, "user")}`,
         })
       },
       dynamicAccessControl: {

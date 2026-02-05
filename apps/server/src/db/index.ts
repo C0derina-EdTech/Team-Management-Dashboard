@@ -147,4 +147,3 @@ export async function getUserMedia(userId: string) {
     data,
   }
 }
-

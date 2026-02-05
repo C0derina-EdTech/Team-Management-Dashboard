@@ -8,28 +8,28 @@ export async function sendEmail({
   subject,
   html,
   attachments,
-  // template,
+  template,
 }: {
   to: string[]
   subject: string
-  html: string
-  template?: string
+  html?: string
+  // jsxTemplate?: unknown
+  template?: { id: string, variables?: Record<string, string | number> | undefined } | any
   attachments?: {
     filename: string
     content: string
     type?: string
   }[]
 }) {
-  const { data, error } = await resend.emails.send({
+  const options = {
     from: "hello@nemma.space",
     to,
     subject,
-    html,
     attachments,
-    // template: {
-    //   id: template,
-    // },
-  })
+    ...(template ? { template } : html ? { html } : {}),
+  }
+
+  const { data, error } = await resend.emails.send(options as any)
 
   if (error) {
     return console.error({ error })

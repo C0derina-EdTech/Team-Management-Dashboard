@@ -62,9 +62,26 @@ Run project in `production` mode:
 docker compose up -d
 ```
 # TODO
-[] Credentials upload
-[] Admin creation
-[] Organization creation
-[] Team creation
-[] Community Head creation
-[✅] Member creation 
+[] Events
+    [] Events reports
+    [] Events stats
+    [] Event registration
+    [] Check in
+[] Admin Dashboard stats
+[] User Dashboard stats
+[] Security check
+    [] Custom roles for User
+        [] Team manager
+    [] Custom roles for Admin
+        [] Event manager
+        [] CheckIn Staff
+    [] Check-in app:
+        [] Only Event manager, CheckIn Staff and Admin should be able to access it
+[] Email/Notification
+    [] Changing URL for email if request is from check-in app, admin app or user-app
+    [] Template setup
+        [+] Sign up
+        [+] Reset password
+        [+] Invitation
+        [+] Event registration
+        [] Event Notifications

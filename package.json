@@ -5,6 +5,9 @@
   "scripts": {
     "build": "turbo build",
     "dev": "nx run-many -t dev",
+    "dev:web": "nx run-many -t dev --exclude=server,transactional",
+    "dev:api": "nx run server:dev",
+    "dev:email": "nx run transactional:dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "build:check-in": "nx build:check-in",

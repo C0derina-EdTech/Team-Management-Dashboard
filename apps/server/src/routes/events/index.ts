@@ -1,5 +1,5 @@
 import type { ElysiaApp } from "../../server.ts"
-import Elysia, { t } from "elysia"
+import { t } from "elysia"
 import { authGuard } from "../../auth/auth.ts"
 import {
   deleteOne,
@@ -31,7 +31,7 @@ export default (events: ElysiaApp) => events.model({
   .use(authGuard)
   .get("", ({ query: { page, pageSize }, user: { id: userId } }: { query: { page?: number, pageSize?: number }, user: { id: string } }) =>
     getUserEvents(userId, page, pageSize), {
-    auth: true,
+    // auth: true,
     query: t.Object({
       page: t.Optional(t.Number()),
       pageSize: t.Optional(t.Number()),
@@ -67,7 +67,7 @@ export default (events: ElysiaApp) => events.model({
     body,
   }: {
     params: { id: string }
-    body: { body: NewEvent }
+    body: NewEvent
   }) => updateOne("events", id, body), {
     body: t.Partial(t.Object(eventInsert as any)),
     params: t.Object({
@@ -80,8 +80,8 @@ export default (events: ElysiaApp) => events.model({
     body,
   }: {
     params: { id: string }
-    body: { body: NewTicket }
-  }) => EventCheckin(body.body?.ticket_code, id), {
+    body: NewTicket
+  }) => EventCheckin(body.ticket_code, id), {
     body: t.Partial(t.Object(ticketInsert as any)),
     params: t.Object({
       id: t.String(),
@@ -91,19 +91,21 @@ export default (events: ElysiaApp) => events.model({
   .post(
     "/:id/register",
     async ({ params: { id: eventId }, body, user }) => {
-      const userId = user.id;
+      const userId = user.id
 
       // 1️⃣ Fetch dependencies in parallel
       const [eventRes, userRes] = await Promise.all([
         getSingleEvent(eventId),
         getOneByID("user", userId),
-      ]);
+      ])
 
-      if (!eventRes?.data) throw new Error("Event not found");
-      if (!userRes?.data) throw new Error("User not found");
+      if (!eventRes?.data)
+        throw new Error("Event not found")
+      if (!userRes?.data)
+        throw new Error("User not found")
 
       // 2️⃣ Create ticket (critical path)
-      const ticketCode = crypto.randomUUID();
+      const ticketCode = crypto.randomUUID()
 
       const { data: ticket } = await insertOne("ticket", {
         ...body,
@@ -111,7 +113,7 @@ export default (events: ElysiaApp) => events.model({
         user_id: userId,
         ticket_code: ticketCode,
         status: "ISSUED",
-      });
+      })
 
       // 3️⃣ Fire-and-forget side effects
       void issueTicketArtifacts({
@@ -119,23 +121,43 @@ export default (events: ElysiaApp) => events.model({
         ticketCode,
         event: eventRes.data,
         user: userRes.data,
-      });
+      })
 
       return {
         message: "You have successfully registered for the event",
         data: ticket,
-      };
+      }
     },
     {
       body: t.Object(ticketInsert as any),
       params: t.Object({ id: t.String() }),
       auth: true,
-    }
+    },
   )
   .delete("/:id", ({ params: { id } }: { params: { id: string } }) => {
     deleteOne("events", id)
   }, {
     auth: true,
   })
-
-
+  .ws("/:id/stats", {
+    // validate incoming messages (optional)
+    body: t.Object({ message: t.String() }),
+    params: t.Object({
+      id: t.String(),
+    }),
+    // runs for every new client
+    open(ws) {
+      console.log("🔗 client connected")
+      ws.send({ event: "welcome", data: "Welcome to the chat!" })
+    },
+    // runs for every incoming message
+    message(ws, { message }) {
+      console.log("📨", message)
+      // echo back (you could broadcast, store, etc.)
+      ws.send({ event: "echo", data: message })
+    },
+    // runs when a client disconnects
+    close(ws, code) {
+      console.log("❌ client left", code)
+    },
+  })

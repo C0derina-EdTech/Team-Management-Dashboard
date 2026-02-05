@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
-import { AuthUIProvider } from "@daveyplate/better-auth-ui"
+import { AuthUIProvider, SignUpForm } from "@daveyplate/better-auth-ui"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client";
@@ -34,7 +34,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
           providers: ["google"],
 
         }}
-
+        teams={{
+          // enabled: true,
+          // customRoles: [{
+          //   role: "Team manager",
+          //   label: "Team manage"
+          // }]
+        }}
+        optimistic={true}
         account={{
           // basePath: "/dashboard",
           // fields: ["image", "name"]
