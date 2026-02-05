@@ -9,6 +9,7 @@ import { autoload } from "elysia-autoload"
 import { healthcheckPlugin } from "elysia-healthcheck"
 import { Logestic } from "logestic"
 import { auth, OpenAPI } from "./auth/auth.js"
+import { clearDb, seedDb } from "./db/index.ts"
 
 export const app = new Elysia()
   .use(bearer())
@@ -36,7 +37,7 @@ export const app = new Elysia()
         },
         servers: [
           {
-            url: "http://localhost:3000",
+            url: "http://localhost:4000",
             description: "Local development server",
           },
           {
@@ -52,5 +53,17 @@ export const app = new Elysia()
   )
   .use(Logestic.preset("common"))
   .mount(auth.handler)
+  .get("/seed", async () => {
+    await seedDb()
+    return {
+      message: "Successfully seeded database",
+    }
+  })
+  .get("/clear", async () => {
+    await clearDb()
+    return {
+      message: "Successfully deleted database",
+    }
+  })
 
 export type ElysiaApp = typeof app

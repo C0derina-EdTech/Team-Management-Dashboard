@@ -1,7 +1,8 @@
 import { gte } from "better-auth"
-import { and, desc, eq, lte } from "drizzle-orm"
+import { and, count, desc, eq, lte, sql } from "drizzle-orm"
+import { NotFoundError } from "elysia"
 import { PAGE_SIZE } from "../constants.ts"
-import { db, getPaginatedMeta, updateOne } from "../index.ts"
+import { db, getPaginatedMeta } from "../index.ts"
 import * as schema from "../schema.ts"
 
 export async function getSingleEvent(eventId: string) {
@@ -18,45 +19,35 @@ export async function getSingleEvent(eventId: string) {
   }
 }
 export async function getSingleEventStats(eventId: string) {
-  const event = await db.query.events.findFirst({
-    where: eq(schema.events.id, eventId),
-    with: {
-      tickets: true,
-      // post_media: true,
-    },
-    orderBy: [desc(schema.events.startDate)],
-  })
-  // get issued tickets
-  // get checked-in tickets
-  // get total tickets
+  // 1. Fetch event details and ticket stats in parallel or a single join
+  const result = await db
+    .select({
+      event: schema.events,
+      totalTickets: count(schema.ticket.id),
+      // Using conditional aggregation to count statuses in one go
+      issuedCount: sql<number>`count(${schema.ticket.id}) filter (where ${schema.ticket.status} = 'ISSUED')`,
+      checkedInCount: sql<number>`count(${schema.ticket.id}) filter (where ${schema.ticket.status} = 'CHECKED_IN')`,
+    })
+    .from(schema.events)
+    .leftJoin(schema.ticket, eq(schema.events.id, schema.ticket.event_id))
+    .where(eq(schema.events.id, eventId))
+    .groupBy(schema.events.id)
 
-  const issuedTickets = await db?.query?.events.findFirst({
-    where: eq(schema.events.id, eventId),
-    with: {
-      // post_media: true,
-      tickets: {
-        where: eq(schema.ticket.status, "ISSUED"),
-      },
-    },
-    orderBy: [desc(schema.ticket.createdAt)],
-  })
-  const checkedInTickets = await db?.query?.events.findFirst({
-    where: eq(schema.events.id, eventId),
-    with: {
-      // post_media: true,
-      tickets: {
-        where: eq(schema.ticket.status, "CHECKED_IN"),
-      },
-    },
-    orderBy: [desc(schema.ticket.createdAt)],
-  })
+  const stats = result[0]
+
+  if (!stats) {
+    throw new NotFoundError("Event not found")
+  }
 
   return {
     message: `Successfully retrieved event stats`,
     data: {
-      event,
-      issuedTickets,
-      checkedInTickets,
+      event: stats.event,
+      stats: {
+        total: Number(stats.totalTickets),
+        issued: Number(stats.issuedCount),
+        checkedIn: Number(stats.checkedInCount),
+      },
     },
   }
 }
@@ -80,9 +71,32 @@ export async function getUserEvents(userId: string, page = 1, pageSize = PAGE_SI
   )
 
   return {
-    message: `Successfully retrieved all tickets`,
+    message: `Successfully retrieved all events for a user`,
     data,
     meta: getPaginatedMeta(page, pageSize, total),
+  }
+}
+export async function getAllEvents(page = 1, pageSize = PAGE_SIZE) {
+  // 1. Sanitize inputs
+  const limit = Math.min(Math.max(1, pageSize), 100)
+  const offset = (Math.max(1, page) - 1) * limit
+
+  // 2. Run queries in parallel to save time
+  const [events, totalResult] = await Promise.all([
+    db.query.events.findMany({
+      limit,
+      offset,
+      orderBy: [desc(schema.events.createdAt)],
+    }),
+    db.select({ value: count() }).from(schema.events),
+  ])
+
+  const total = totalResult[0]?.value ?? 0
+
+  return {
+    message: `Successfully retrieved all events`,
+    data: events,
+    meta: getPaginatedMeta(page, limit, total),
   }
 }
 

@@ -1,10 +1,11 @@
 import type { SQLWrapper } from "drizzle-orm"
-import { and, desc, eq } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/postgres-js"
 import { reset, seed } from "drizzle-seed"
 import { NotFoundError } from "elysia"
 import postgres from "postgres"
 import { config } from "../config.ts"
+import { PAGE_SIZE } from "./constants.ts"
 import * as schema from "./schema.ts"
 
 export * from "./events/index.ts"
@@ -35,12 +36,14 @@ export async function updateUserRole(userId: string, role: string = "admin") {
     .returning()
 }
 
-export function getPaginatedMeta(page: number, pageSize: number, total: number) {
+export function getPaginatedMeta(page: number, pageSize: number = PAGE_SIZE, total: number) {
+  const lastPage = Math.ceil(total / pageSize)
   return {
     page,
     total,
-    prev: page > 1 ? page - 1 : 1,
-    next: total === pageSize ? page + 1 : page,
+    totalPages: lastPage,
+    prev: page > 1 ? page - 1 : null,
+    next: page < lastPage ? page + 1 : null,
     pageSize,
   }
 }

@@ -4,6 +4,7 @@ import { authGuard } from "../../auth/auth.ts"
 import {
   deleteOne,
   EventCheckin,
+  getAllEvents,
   getOneByID,
   getSingleEvent,
   getSingleEventStats,
@@ -31,10 +32,25 @@ export default (events: ElysiaApp) => events.model({
   .use(authGuard)
   .get("", ({ query: { page, pageSize }, user: { id: userId } }: { query: { page?: number, pageSize?: number }, user: { id: string } }) =>
     getUserEvents(userId, page, pageSize), {
-    // auth: true,
+    auth: true,
     query: t.Object({
       page: t.Optional(t.Number()),
       pageSize: t.Optional(t.Number()),
+    }),
+  })
+  .get("/all", ({ query: { page, pageSize } }: { query: { page?: number, pageSize?: number }, user: { id: string } }) =>
+    getAllEvents(page, pageSize), {
+    query: t.Object({
+      page: t.Optional(t.Number(
+        {
+          default: 1,
+        },
+      )),
+      pageSize: t.Optional(t.Number(
+        {
+          default: 10,
+        },
+      )),
     }),
   })
   .get("/:id", ({ params: { id } }: { params: { id: string } }) => getSingleEvent(id), {

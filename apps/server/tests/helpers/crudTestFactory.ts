@@ -36,6 +36,7 @@ export function createCrudTestSuite<T>(opts: CrudTestOptions<T>) {
         meta: {
           page: numberRegex,
           total: numberRegex,
+          totalPages: numberRegex,
           prev: numberRegex,
           next: numberRegex,
           pageSize: numberRegex,
