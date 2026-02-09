@@ -12,9 +12,12 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
-    "hooks": "@/hooks",
-    "lib": "@/lib",
     "utils": "@coderina-ams/ui/lib/utils",
-    "ui": "@coderina-ams/ui/components"
+    "ui": "@coderina-ams/ui/components",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "@formcn": "https://formcn.dev/r/{name}.json"
   }
 }
