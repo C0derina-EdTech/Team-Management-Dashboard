@@ -23,7 +23,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "../../packages/ui/src/components/data-table.tsx"
-, "../../packages/ui/src/hooks/use-pagination.ts"  ],
+, "../../packages/ui/src/hooks/use-pagination.ts", "../../packages/ui/src/components/file-upload.tsx", "../../packages/ui/src/components/forms/event-registration-form.tsx"  ],
   "exclude": [
     "node_modules"
   ]

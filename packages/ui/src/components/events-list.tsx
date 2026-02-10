@@ -2,12 +2,14 @@ import { EventSection } from "@coderina-ams/ui/components/event-section";
 import { mockEvents } from "@coderina-ams/ui/lib/events";
 
 
-export default function EventsList() {
+export default function EventsList({children} : {children?: React.ReactNode}) {
     const upcomingEvents = mockEvents.filter((e) => e.status === 'upcoming');
     const ongoingEvents = mockEvents.filter((e) => e.status === 'ongoing');
     const pastEvents = mockEvents.filter((e) => e.status === 'past');
+
     return (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {children}
             <EventSection
                 title="Upcoming Events"
                 description="Register now for exciting events coming soon"

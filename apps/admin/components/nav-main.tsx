@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@coderina-ams/ui/components/sidebar";
-import { Book, File, LucideIcon } from "lucide-react";
+import { Book, Calendar, File, LucideIcon, User, Users2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -65,22 +65,22 @@ export function NavMain({
                 sideOffset={4}
               >
                 <DropdownMenuGroup >
-                  <Link className="cursor-pointer" href="/">
+                  <Link className="cursor-pointer" href="/events/create">
                     <DropdownMenuItem>
-                      <File />
-                      Credentials
+                      <Calendar />
+                      Events
                     </DropdownMenuItem>
                   </Link>
-                  <Link className="cursor-pointer" href="/">
+                  <Link className="cursor-pointer" href="/teams/create">
                     <DropdownMenuItem>
-                      <IconRobotFace />
-                      Copilot
+                      <Users2 />
+                      Team
                     </DropdownMenuItem>
                   </Link>
-                  <Link className="cursor-pointer" href="/">
+                  <Link className="cursor-pointer" href="/users">
                     <DropdownMenuItem>
-                      <Book />
-                      Application
+                      <User />
+                      User
                     </DropdownMenuItem>
                   </Link>
                 </DropdownMenuGroup>

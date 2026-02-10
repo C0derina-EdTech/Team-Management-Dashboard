@@ -2,8 +2,10 @@
 
 import { Event } from '@coderina-ams/ui/lib/events';
 import { Button } from '@coderina-ams/ui/components/button';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@coderina-ams/ui/components/drawer';
 import Link from 'next/link';
 import { CalendarIcon, MapPinIcon, UsersIcon } from 'lucide-react';
+import { EventRegistrationForm } from '@coderina-ams/ui/components/forms/event-registration-form';
 
 export function EventCard({ event }: { event: Event }) {
     return (
@@ -62,13 +64,41 @@ export function EventCard({ event }: { event: Event }) {
                             View Details
                         </Button>
                     </Link>
-                    <Link href={`/register?eventId=${event.id}`} className="flex-1">
-                        <Button className="w-full">
+                    <Link href={`#`} className="flex-1">
+                        {/* <Button className="w-full">
                             Register
-                        </Button>
+                        </Button> */}
+                        <EventRegisterScrollableContent event={event}/>
                     </Link>
                 </div>
             </div>
         </div>
     );
+}
+
+
+
+export function EventRegisterScrollableContent({event}: {event: Event}) {
+  return (
+    <Drawer direction="right">
+      <DrawerTrigger asChild>
+        <Button className="w-full" >Register</Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>{event.title}</DrawerTitle>
+          <DrawerDescription>{event.description}</DrawerDescription>
+        </DrawerHeader>
+        <div className="no-scrollbar overflow-y-auto px-4">
+            <EventRegistrationForm event={event}  />
+        </div>
+        {/* <DrawerFooter>
+          <Button>Submit</Button>
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter> */}
+      </DrawerContent>
+    </Drawer>
+  )
 }
